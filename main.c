@@ -36,10 +36,10 @@ void encrypt_decrypt(char* filename){
 
 	file = fopen(filename, "w+b");
 
-	char encrypted[strlen(input)];
+	char encrypted[size];
 	
 	int i;
-	for(i = 0; i < strlen(input); i++)
+	for(i = 0; i < size; i++)
 		encrypted[i] = input[i] ^ key[i % (sizeof(key)/sizeof(char))];
 
 	fwrite(encrypted, sizeof(encrypted), 1, file);
@@ -48,8 +48,8 @@ void encrypt_decrypt(char* filename){
 
 int main (int argc, char *argv[]) {
 	
-	char filename[] = "test";
-	encrypt_decrypt(filename);
+//	char filename[] = "test";
+	encrypt_decrypt(argv[1]);
 	
 	return 0;
 }
