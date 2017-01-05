@@ -48,7 +48,6 @@ void encrypt_decrypt(char* filename){
 
 int main (int argc, char *argv[]) {
 	
-//	char filename[] = "test";
 	encrypt_decrypt(argv[1]);
 	
 	return 0;
