@@ -1,6 +1,7 @@
 # Files for testing
 mount
 image
+test
 
 # Object files
 *.o
