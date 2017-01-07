@@ -3,10 +3,6 @@
 #include <linux/fs.h>
 #include "module.h"
 
-
-
-
-
 static void efs_put_super(struct super_block *sb){
 	printk(KERN_ALERT "Efs super block have been destroyed\n");
 }

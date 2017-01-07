@@ -1,8 +1,4 @@
-#include <unistd.h> 
 #include <stdio.h> 
-#include <sys/types.h> 
-#include <sys/stat.h> 
-#include <fcntl.h>
 #include <stdlib.h>
 
 size_t calculate_size(FILE* input_file){
@@ -47,29 +43,20 @@ void encrypt_decrypt(char* filename){
 
 	fwrite(encrypted, sizeof(encrypted), 1, file);
 	fclose(file);
+
+	printf("%s was successfully encrypted/decrypted\n", filename);
+
 }
 
 int main (int argc, char *argv[]) {
 
-	int fd;
+	char filename[256];
+	int flag;
 
-	if (argc != 2) { 
-	    printf("Usage: ./a.out <filename>\n"); 
-		return -1; 
-	} 
+	printf("Please, choose, which file you want to encrypt/decrypt: ");
+	scanf("%s", filename);
+	encrypt_decrypt(filename);
 
-	fd = open(argv[1], O_RDWR); 
-	if (fd == -1) { 
-		perror("Error opening the device"); 
-		return -1; 
-	} else {
-		printf("successfully opened with fd: %d", fd);
-	}
-
-
-
-	encrypt_decrypt(argv[1]);
-	
 	return 0;
 }
 
