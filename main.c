@@ -1,6 +1,5 @@
-#include <stdio.h>
+#include <stdio.h> 
 #include <stdlib.h>
-#include <string.h>
 
 size_t calculate_size(FILE* input_file){
 	fseek(input_file, 0, SEEK_END);
@@ -44,12 +43,20 @@ void encrypt_decrypt(char* filename){
 
 	fwrite(encrypted, sizeof(encrypted), 1, file);
 	fclose(file);
+
+	printf("%s was successfully encrypted/decrypted\n", filename);
+
 }
 
 int main (int argc, char *argv[]) {
-	
-	encrypt_decrypt(argv[1]);
-	
+
+	char filename[256];
+	int flag;
+
+	printf("Please, choose, which file you want to encrypt/decrypt: ");
+	scanf("%s", filename);
+	encrypt_decrypt(filename);
+
 	return 0;
 }
 
