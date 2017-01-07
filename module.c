@@ -1,9 +1,10 @@
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/fs.h>
+#include "module.h"
 
 
-static unsigned long const EFS_MAGIC_NUMBER = 0x13131313;
+
 
 
 static void efs_put_super(struct super_block *sb){
@@ -49,7 +50,6 @@ static struct dentry *efs_mount(struct file_system_type *fs_type,
 
 	struct dentry *ret;
 	ret = mount_bdev(fs_type, flags, dev_name, data, efs_fill_super);
-
 
 	if (IS_ERR(ret))
 		printk(KERN_ALERT "Mounting failed\n");

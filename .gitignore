@@ -1,3 +1,7 @@
+# Files for testing
+mount
+image
+
 # Object files
 *.o
 *.ko

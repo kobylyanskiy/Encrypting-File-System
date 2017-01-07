@@ -1,6 +1,9 @@
-#include <stdio.h>
+#include <unistd.h> 
+#include <stdio.h> 
+#include <sys/types.h> 
+#include <sys/stat.h> 
+#include <fcntl.h>
 #include <stdlib.h>
-#include <string.h>
 
 size_t calculate_size(FILE* input_file){
 	fseek(input_file, 0, SEEK_END);
@@ -47,7 +50,24 @@ void encrypt_decrypt(char* filename){
 }
 
 int main (int argc, char *argv[]) {
-	
+
+	int fd;
+
+	if (argc != 2) { 
+	    printf("Usage: ./a.out <filename>\n"); 
+		return -1; 
+	} 
+
+	fd = open(argv[1], O_RDWR); 
+	if (fd == -1) { 
+		perror("Error opening the device"); 
+		return -1; 
+	} else {
+		printf("successfully opened with fd: %d", fd);
+	}
+
+
+
 	encrypt_decrypt(argv[1]);
 	
 	return 0;
