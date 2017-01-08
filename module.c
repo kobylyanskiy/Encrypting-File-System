@@ -3,8 +3,37 @@
 #include <linux/fs.h>
 #include "module.h"
 
+
+static int efs_iterate(struct file *filp, struct dir_context *ctx) { 
+  /* ls will list nothing as of now. 
+   * Basic skeleton code to make ls (readdir) work for simplefs */ 
+  
+	/*loff_t pos;
+	pos = ctx->pos;
+	*/
+
+	return 0; 
+} 
+ 
+const struct file_operations efs_dir_operations = { 
+  .owner = THIS_MODULE, 
+  .iterate = efs_iterate, 
+}; 
+ 
+struct dentry *efs_lookup(struct inode *parent_inode, 
+             struct dentry *child_dentry, unsigned int flags) { 
+  /* The lookup function is used for dentry association. 
+   * As of now, we don't deal with dentries in simplefs. 
+   * So we will keep this simple for now and revisit later */ 
+  return NULL; 
+} 
+ 
+static struct inode_operations efs_inode_ops = { 
+  .lookup = efs_lookup, 
+}; 
+
 static void efs_put_super(struct super_block *sb){
-	printk(KERN_ALERT "Efs super block have been destroyed\n");
+	printk(KERN_ALERT "efs super block have been destroyed\n");
 }
 
 static struct super_operations const efs_super_ops = {
@@ -19,6 +48,9 @@ int efs_fill_super(struct super_block *sb, void *data, int silent){
 	sb->s_op = &efs_super_ops;
 
 	root = new_inode(sb);
+
+	root->i_op = &efs_inode_ops; 
+  	root->i_fop = &efs_dir_operations; 
 
 	if (!root){
 		printk(KERN_ERR "Inode allocation failed\n");
