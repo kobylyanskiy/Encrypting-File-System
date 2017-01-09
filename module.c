@@ -5,13 +5,6 @@
 
 
 static int efs_iterate(struct file *filp, struct dir_context *ctx) { 
-  /* ls will list nothing as of now. 
-   * Basic skeleton code to make ls (readdir) work for simplefs */ 
-  
-	/*loff_t pos;
-	pos = ctx->pos;
-	*/
-
 	return 0; 
 } 
  
@@ -22,9 +15,6 @@ const struct file_operations efs_dir_operations = {
  
 struct dentry *efs_lookup(struct inode *parent_inode, 
              struct dentry *child_dentry, unsigned int flags) { 
-  /* The lookup function is used for dentry association. 
-   * As of now, we don't deal with dentries in simplefs. 
-   * So we will keep this simple for now and revisit later */ 
   return NULL; 
 } 
  

@@ -1,9 +1,15 @@
 #include <stdio.h> 
 #include <stdlib.h>
+#include <openssl/aes.h>
+#include <openssl/evp.h>
+
 
 size_t calculate_size(FILE* input_file){
+	int filesize;
 	fseek(input_file, 0, SEEK_END);
-	return ftell(input_file);
+	filesize = ftell(input_file);
+	rewind(input_file);
+	return filesize;
 }
 
 FILE* open_file(char* filename){
@@ -18,45 +24,42 @@ FILE* open_file(char* filename){
 	return input_file;
 }
 
-void encrypt_decrypt(char* filename){
-	
-	char key[] = {'n', 'w', 'W', 'Z', 'T', 'M', '5', 'J', 'S', 'z', 'a',
-	'L', 'D', '0', 'W', 't', 'Q', '8', 'd', 'G', 'w', 'I', 'n', 'O', 'l',
-	'H', 'f', 'U', 'h', 'd', '7', 'z', 'Y', '2', '6', 'Z', '8', 'O', 'K',
-	'N', 'F', 'M', 'l', 'k', 'J', 'O', 'n', 'C', 'r', '7', 'I', '8', 'Q',
-	'K', 'u', '5', '7', '5', '2', 'H', 'y', 'V', 'P', 'g'};
+void encrypt_decrypt(char* filename, char* passkey){
+
+	int num = 0;
+	AES_KEY key;
+	AES_set_encrypt_key(passkey, 128, &key);
 
 	FILE* file = open_file(filename); 
 	size_t size = calculate_size(file);
-	rewind(file);
 
-	char *input = (char*)malloc(size * sizeof(char));
-	fread(input, sizeof(char), size, file);
+	char* input = (char*)malloc(size);
+	char* encrypted = (char*)malloc(size);
+	
+	fread(input, 1, size, file);
 
 	file = fopen(filename, "w+b");
 
-	char encrypted[size];
+	AES_cfb128_encrypt(input, encrypted, size, &key, passkey, &num, AES_ENCRYPT);
 	
-	int i;
-	for(i = 0; i < size; i++)
-		encrypted[i] = input[i] ^ key[i % (sizeof(key)/sizeof(char))];
-
-	fwrite(encrypted, sizeof(encrypted), 1, file);
+	fwrite(encrypted, size, 1, file);
 	fclose(file);
 
 	printf("%s was successfully encrypted/decrypted\n", filename);
-
 }
 
 int main (int argc, char *argv[]) {
 
+	char passkey[256];
 	char filename[256];
-	int flag;
 
 	printf("Please, choose, which file you want to encrypt/decrypt: ");
 	scanf("%s", filename);
-	encrypt_decrypt(filename);
 
+	printf("Please, enter passkey: ");
+	scanf("%s", passkey);
+
+	encrypt_decrypt(filename, passkey);
 	return 0;
 }
 
