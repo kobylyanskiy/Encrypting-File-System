@@ -2,7 +2,7 @@
 #include <linux/module.h>
 #include <linux/fs.h>
 #include "module.h"
-
+#include <linux/buffer_head.h>
 
 static int efs_iterate(struct file *filp, struct dir_context *ctx) { 
 	return 0; 
@@ -33,6 +33,30 @@ static struct super_operations const efs_super_ops = {
 int efs_fill_super(struct super_block *sb, void *data, int silent){
 	
 	struct inode *root = NULL;
+
+	struct buffer_head *bh; 
+	struct efs_super_block *sb_disk; 
+	
+	bh = (struct buffer_head *)sb_bread(sb, 0); 
+	
+	sb_disk = (struct efs_super_block *)bh->b_data; 
+	
+	printk(KERN_INFO "The magic number obtained in disk is: [%d]\n", sb_disk->magic); 
+	
+	if (unlikely(sb_disk->magic != EFS_MAGIC_NUMBER)) { 
+	  printk(KERN_ERR 
+	         "The filesystem that you try to mount is not of type efs. Magicnumber mismatch."); 
+	  return -EPERM; 
+	} 
+	
+	if (unlikely(sb_disk->block_size != EFS_DEFAULT_BLOCK_SIZE)) { 
+	  printk(KERN_ERR "efs seem to be formatted using a non-standard block size."); 
+	  return -EPERM; 
+	} 
+	
+	printk(KERN_INFO 
+		"efs filesystem of version [%d] formatted with a block size of [%d] detected in the device.\n", 
+		sb_disk->version, sb_disk->block_size); 
 
 	sb->s_magic = EFS_MAGIC_NUMBER;		        
 	sb->s_op = &efs_super_ops;
