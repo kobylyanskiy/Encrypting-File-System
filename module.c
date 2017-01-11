@@ -4,7 +4,20 @@
 #include "module.h"
 #include <linux/buffer_head.h>
 
-static int efs_iterate(struct file *filp, struct dir_context *ctx) { 
+static int efs_iterate(struct file *filp, struct dir_context *ctx) {
+
+	loff_t pos = ctx->pos; 
+	struct inode *inode = filp->f_path.dentry->d_inode; 
+	struct super_block *sb = inode->i_sb; 
+	struct buffer_head *bh; 
+	struct efs_inode *sfs_inode; 
+	struct efs_dir_record *record; 
+	int i; 
+
+	
+	printk(KERN_INFO "We are inside readdir. The pos[%lld], inode number[%lu], superblock magic [%lu]\n", pos, inode->i_ino, sb->s_magic);
+
+
 	return 0; 
 } 
  
@@ -31,14 +44,19 @@ static struct super_operations const efs_super_ops = {
 };
 
 int efs_fill_super(struct super_block *sb, void *data, int silent){
-	
-	struct inode *root = NULL;
 
+	kuid_t uid;
+	kgid_t gid;
+
+	struct inode *root = NULL;
 	struct buffer_head *bh; 
 	struct efs_super_block *sb_disk; 
 	
+
+	uid.val = 1000;
+	gid.val = 1000;
+
 	bh = (struct buffer_head *)sb_bread(sb, 0); 
-	
 	sb_disk = (struct efs_super_block *)bh->b_data; 
 
 	printk(KERN_INFO "The magic number obtained in disk is: [%d]\n", sb_disk->magic); 
@@ -68,29 +86,18 @@ int efs_fill_super(struct super_block *sb, void *data, int silent){
 		return -ENOMEM;
 	}
 	
-	
-	root->i_size		= 0;
-	root->i_mode		= S_IFDIR | S_IRUGO | S_IXUGO;
-	set_nlink(root, 2);
-	root->i_uid		= GLOBAL_ROOT_UID;
-	root->i_gid		= GLOBAL_ROOT_GID;
+	root->i_size		= 4096;
+	root->i_mode		= S_ISUID;
+	set_nlink(root, 1);
+	root->i_uid		= current_fsuid();
+	root->i_gid		= current_fsgid();
 	root->i_ctime.tv_sec	= get_seconds();
 	root->i_ctime.tv_nsec	= 0;
 	root->i_atime		= root->i_mtime = root->i_ctime;
-	root->i_blocks		= 0;
+	root->i_blocks		= 1;
 	root->i_version	= 0;
 	root->i_generation	= 0;	
-	
-	
-	
-	
 	root->i_op = &efs_inode_ops; 
-	/*
-  	root->i_fop = &efs_dir_operations; 
-	root->i_ino = 0;
-	root->i_sb = sb;
-	root->i_atime = root->i_mtime = root->i_ctime = CURRENT_TIME;
-	*/
 
 	inode_init_owner(root, NULL, S_IFDIR);
 	sb->s_root = d_make_root(root);

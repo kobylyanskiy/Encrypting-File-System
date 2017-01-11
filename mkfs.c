@@ -24,7 +24,30 @@ static int write_root_inode(int fd){
 		return -1;
 	}
 
-	printf("root directory inode written succesfully\n");
+	printf("root directory inode written succesfully, [%ld] bytes was written\n", ret);
+	return 0;
+
+}
+
+static int write_free_blocks(int fd){
+	ssize_t ret;
+
+	char bitmap[4096] = {0};
+	bitmap[0] = 124;
+
+	struct efs_free_blocks free_blocks = {
+		.bitmap = *bitmap
+	};
+
+	ret = write(fd, &free_blocks, sizeof(free_blocks));
+
+	if (ret != sizeof(free_blocks)) {
+		printf
+		    ("Free blocks were not written properly. Retry your mkfs\n");
+		return -1;
+	}
+
+	printf("free blocks written succesfully, [%ld] bytes was written\n", ret);
 	return 0;
 
 }
@@ -42,12 +65,11 @@ static int write_superblock(int fd){
 	ret = write(fd, (char *)&sb, sizeof(sb));
 	if (ret != EFS_DEFAULT_BLOCK_SIZE) {
 		printf
-		    ("bytes written [%d] are not equal to the default block size\n",
-		     (int)ret);
+		    ("[%ld] bytes written aren't equal to the default block size\n", ret);
 		return -1;
 	} 
 	
-	printf("Super block written succesfully\n");
+	printf("Super block written succesfully, [%ld] bytes was written\n", ret);
 	return 0;
 
 }
@@ -67,6 +89,7 @@ int main(int argc, char *argv[]) {
 	} 
 
 	write_superblock(fd);
+	write_free_blocks(fd);
 	write_root_inode(fd);	
 	
 	

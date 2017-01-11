@@ -28,3 +28,7 @@ struct efs_super_block {
 	uint32_t free_blocks;
 	char padding[(4096) - (4 * sizeof(uint32_t))]; 
 };
+
+struct efs_free_blocks {
+	char bitmap[4096];
+};
