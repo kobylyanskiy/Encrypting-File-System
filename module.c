@@ -40,7 +40,7 @@ int efs_fill_super(struct super_block *sb, void *data, int silent){
 	bh = (struct buffer_head *)sb_bread(sb, 0); 
 	
 	sb_disk = (struct efs_super_block *)bh->b_data; 
-	
+
 	printk(KERN_INFO "The magic number obtained in disk is: [%d]\n", sb_disk->magic); 
 	
 	if (unlikely(sb_disk->magic != EFS_MAGIC_NUMBER)) { 
@@ -63,18 +63,34 @@ int efs_fill_super(struct super_block *sb, void *data, int silent){
 
 	root = new_inode(sb);
 
-	root->i_op = &efs_inode_ops; 
-  	root->i_fop = &efs_dir_operations; 
-
 	if (!root){
 		printk(KERN_ERR "Inode allocation failed\n");
 		return -ENOMEM;
 	}
-
+	
+	
+	root->i_size		= 0;
+	root->i_mode		= S_IFDIR | S_IRUGO | S_IXUGO;
+	set_nlink(root, 2);
+	root->i_uid		= GLOBAL_ROOT_UID;
+	root->i_gid		= GLOBAL_ROOT_GID;
+	root->i_ctime.tv_sec	= get_seconds();
+	root->i_ctime.tv_nsec	= 0;
+	root->i_atime		= root->i_mtime = root->i_ctime;
+	root->i_blocks		= 0;
+	root->i_version	= 0;
+	root->i_generation	= 0;	
+	
+	
+	
+	
+	root->i_op = &efs_inode_ops; 
+	/*
+  	root->i_fop = &efs_dir_operations; 
 	root->i_ino = 0;
 	root->i_sb = sb;
-
 	root->i_atime = root->i_mtime = root->i_ctime = CURRENT_TIME;
+	*/
 
 	inode_init_owner(root, NULL, S_IFDIR);
 	sb->s_root = d_make_root(root);

@@ -26,6 +26,5 @@ struct efs_super_block {
 	uint32_t magic; 
 	uint32_t block_size; 
 	uint32_t free_blocks;
-	struct efs_inode root_inode;
-	char padding[(4 * 1024) - (4 * sizeof(uint32_t))]; 
+	char padding[(4096) - (4 * sizeof(uint32_t))]; 
 };
