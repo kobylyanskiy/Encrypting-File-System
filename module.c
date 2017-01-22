@@ -434,6 +434,8 @@ static int efs_create_fs_object(struct inode *dir, struct dentry *dentry,
 	memcpy(dir_contents_datablock, record,
                sizeof(struct efs_dir_record));
 
+	kfree(record);
+
 	mark_buffer_dirty(bh);
 	sync_dirty_buffer(bh);
 	brelse(bh);
