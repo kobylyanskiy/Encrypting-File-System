@@ -12,7 +12,7 @@
 4) $ sudo insmod ./encrypt_fs.ko 
 ```
 ```
-5) $ sudo mount -o loop -t efs image ./mount
+5) $ sudo mount -o loop -t encryptfs image ./mount
 ```
 ```
 6) $ sudo umount ./mount

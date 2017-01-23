@@ -1,21 +1,25 @@
 #include <stdio.h> 
 #include <stdlib.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
-size_t calculate_size(FILE* input_file){
-	fseek(input_file, 0, SEEK_END);
-	return ftell(input_file);
+size_t calculate_size(int fd){
+	struct stat st;
+	fstat(fd, &st);
+	return st.st_size;	
 }
 
-FILE* open_file(char* filename){
-	FILE* input_file;
-	
-	input_file = fopen(filename, "r+b");
+int open_file(char* filename){
 
-	if(input_file == NULL){
-		printf("Cannot open file\n");
-		exit(1);
-	}
-	return input_file;
+	int fd;
+
+	fd = open(filename, O_RDWR);
+        if (fd == -1) {
+		perror("Error opening the device");
+                return -1;
+        }
+
+	return fd;
 }
 
 void encrypt_decrypt(char* filename){
@@ -26,23 +30,21 @@ void encrypt_decrypt(char* filename){
 	'N', 'F', 'M', 'l', 'k', 'J', 'O', 'n', 'C', 'r', '7', 'I', '8', 'Q',
 	'K', 'u', '5', '7', '5', '2', 'H', 'y', 'V', 'P', 'g'};
 
-	FILE* file = open_file(filename); 
-	size_t size = calculate_size(file);
-	rewind(file);
+	int fd = open_file(filename); 
+	size_t size = calculate_size(fd);
+
+	printf("opened file with the size of %ld bytes", size);
 
 	char *input = (char*)malloc(size * sizeof(char));
-	fread(input, sizeof(char), size, file);
-
-	file = fopen(filename, "w+b");
+	read(fd, input, size);
 
 	char encrypted[size];
 	
 	int i;
 	for(i = 0; i < size; i++)
 		encrypted[i] = input[i] ^ key[i % (sizeof(key)/sizeof(char))];
-
-	fwrite(encrypted, sizeof(encrypted), 1, file);
-	fclose(file);
+	lseek(fd, 0, SEEK_SET);
+	write(fd, encrypted, sizeof(encrypted));
 
 	printf("%s was successfully encrypted/decrypted\n", filename);
 

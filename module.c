@@ -238,6 +238,8 @@ ssize_t efs_write(struct file * filp, const char __user * buf, size_t len,
 	efs_inode = EFS_INODE(inode);
     sb = inode->i_sb;
 
+	printk(KERN_INFO "%llu", *ppos + len);
+
 	if (*ppos + len >= EFS_DEFAULT_BLOCK_SIZE) {
 		printk(KERN_ERR "File size write will exceed a block");
 		return -ENOSPC;
@@ -277,7 +279,7 @@ ssize_t efs_write(struct file * filp, const char __user * buf, size_t len,
 	bh = (struct buffer_head *)sb_bread(sb,
                                             EFS_INODESTORE_BLOCK_NUMBER);
 
-	efs_inode->file_size = *ppos;
+	efs_inode->file_size = len;
 
 	inode_iterator = (struct efs_inode *)bh->b_data;
 
@@ -392,6 +394,7 @@ static int efs_create_fs_object(struct inode *dir, struct dentry *dentry,
 	inode->i_op = &efs_inode_ops;
 	inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
 	inode->i_ino = 10;
+	inode->i_size = efs_inode->file_size;
 
 	while (efs_get_inode(sb, inode->i_ino)) {
 		inode->i_ino++;
@@ -522,6 +525,7 @@ struct dentry *efs_lookup(struct inode *parent_inode,
 			inode_init_owner(inode,parent_inode,efs_inode->mode);
 			inode->i_sb=sb;
 			inode->i_op=&efs_inode_ops;
+			inode->i_size = efs_inode->file_size;
 
 			if(S_ISDIR(inode->i_mode))
 				inode->i_fop=&efs_dir_operations;
@@ -582,6 +586,7 @@ int efs_fill_super(struct super_block *sb, void *data, int silent){
 	root_inode->i_ino = EFS_ROOTDIR_INODE_NUMBER;
 	inode_init_owner(root_inode, NULL, S_IFDIR);
 	root_inode->i_sb = sb;
+	root_inode->i_size = 4096;
 	root_inode->i_op = &efs_inode_ops;
 	root_inode->i_fop = &efs_dir_operations;
 	root_inode->i_atime = root_inode->i_mtime = root_inode->i_ctime = CURRENT_TIME;
