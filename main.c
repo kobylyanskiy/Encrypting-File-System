@@ -24,6 +24,7 @@ int open_file(char* filename){
 
 void encrypt_decrypt(char* filename){
 	
+	long position;
 	char key[] = {'n', 'w', 'W', 'Z', 'T', 'M', '5', 'J', 'S', 'z', 'a',
 	'L', 'D', '0', 'W', 't', 'Q', '8', 'd', 'G', 'w', 'I', 'n', 'O', 'l',
 	'H', 'f', 'U', 'h', 'd', '7', 'z', 'Y', '2', '6', 'Z', '8', 'O', 'K',
@@ -43,7 +44,8 @@ void encrypt_decrypt(char* filename){
 	int i;
 	for(i = 0; i < size; i++)
 		encrypted[i] = input[i] ^ key[i % (sizeof(key)/sizeof(char))];
-	lseek(fd, 0, SEEK_SET);
+	position = lseek(fd, 0L, SEEK_SET);
+	printf("position: %ld\n", position);
 	write(fd, encrypted, sizeof(encrypted));
 
 	printf("%s was successfully encrypted/decrypted\n", filename);

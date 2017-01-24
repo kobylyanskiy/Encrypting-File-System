@@ -236,9 +236,9 @@ ssize_t efs_write(struct file * filp, const char __user * buf, size_t len,
 
 	inode = filp->f_path.dentry->d_inode;
 	efs_inode = EFS_INODE(inode);
-    sb = inode->i_sb;
+    	sb = inode->i_sb;
 
-	printk(KERN_INFO "%llu", *ppos + len);
+	*ppos = 0;
 
 	if (*ppos + len >= EFS_DEFAULT_BLOCK_SIZE) {
 		printk(KERN_ERR "File size write will exceed a block");
@@ -264,7 +264,7 @@ ssize_t efs_write(struct file * filp, const char __user * buf, size_t len,
                        "Error copying file contents from the userspace buffer to the kernel space\n");
 		return -EFAULT;
 	}
-	*ppos += len;
+	/**ppos += len;*/
 
 	mark_buffer_dirty(bh);
 	sync_dirty_buffer(bh);
@@ -279,6 +279,7 @@ ssize_t efs_write(struct file * filp, const char __user * buf, size_t len,
 	bh = (struct buffer_head *)sb_bread(sb,
                                             EFS_INODESTORE_BLOCK_NUMBER);
 
+	/*efs_inode->file_size = *ppos;*/
 	efs_inode->file_size = len;
 
 	inode_iterator = (struct efs_inode *)bh->b_data;
@@ -394,7 +395,7 @@ static int efs_create_fs_object(struct inode *dir, struct dentry *dentry,
 	inode->i_op = &efs_inode_ops;
 	inode->i_atime = inode->i_mtime = inode->i_ctime = CURRENT_TIME;
 	inode->i_ino = 10;
-	inode->i_size = efs_inode->file_size;
+	/*inode->i_size = efs_inode->file_size;*/
 
 	while (efs_get_inode(sb, inode->i_ino)) {
 		inode->i_ino++;
@@ -411,7 +412,7 @@ static int efs_create_fs_object(struct inode *dir, struct dentry *dentry,
 		inode->i_fop = &efs_dir_operations;
 	} else if (S_ISREG(mode)) {
 		printk(KERN_INFO "New file creation request\n");
-		efs_inode->file_size = 0;
+		efs_inode->file_size = 10;
 		inode->i_fop = &efs_file_operations;
 	}
 
