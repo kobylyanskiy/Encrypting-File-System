@@ -17,6 +17,7 @@ int main(int argc, char *argv[]){
 	struct timespec time;
 	struct efs_super_block sb;
 	struct efs_inode root_inode;
+	struct efs_inode* inode_group;
 	struct efs_inode welcomefile_inode;
 
 	char* data_bitmap;
@@ -69,7 +70,7 @@ int main(int argc, char *argv[]){
 		ret = -1;
 		goto exit;
 	}
-
+	free(inode_bitmap);
 	printf("Inode table has been written succesfully\n");
 	/* End of writing block 1 - inode bitmap */
 
@@ -88,36 +89,44 @@ int main(int argc, char *argv[]){
 		ret = -1;
 		goto exit;
 	}
-
+	free(data_bitmap);
 	printf("Data table has been written succesfully\n");
 	/* End of writing block 2 - data bitmap */
 
 
-	/* Begin of writing blocks 3-35 - inode Store */
-	root_inode.mode = S_IFDIR;
-	root_inode.inode_no = EFS_ROOTDIR_INODE_NUMBER;
-	root_inode.data_block_number = EFS_ROOTDIR_DATABLOCK_NUMBER;
-	root_inode.dir_children_count = 1;
-	root_inode.uid = getuid();
-	root_inode.gid = getgid();
+	/* Begin of writing blocks 3-34 - inode Store */
+	
+	inode_group = calloc(EFS_INODES_IN_BLOCK, sizeof(struct efs_inode));
+
+	inode_group[0].mode = S_IFDIR;
+	inode_group[0].inode_no = EFS_ROOTDIR_INODE_NUMBER;
+	inode_group[0].data_block_number = EFS_ROOTDIR_DATABLOCK_NUMBER;
+	inode_group[0].dir_children_count = 1;
+	inode_group[0].uid = getuid();
+	inode_group[0].gid = getgid();
 
 	ret = (ssize_t)clock_gettime(CLOCK_REALTIME, &time);
 	if(ret == -1){
 		goto exit;
 	}
 
+	inode_group[0].atime = inode_group[0].mtime = inode_group[0].ctime = time;
+	ret = write(fd, inode_group, EFS_DEFAULT_BLOCK_SIZE);
 
-	root_inode.atime = root_inode.mtime = root_inode.ctime = time;
-	ret = write(fd, (char *)&root_inode, sizeof(root_inode));
-
-	if (ret != sizeof(root_inode)) {
+	if (ret != EFS_DEFAULT_BLOCK_SIZE) {
 		printf
 		    ("The inode store was not written properly. Retry your mkfs\n");
 		ret = -1;
 		goto exit;
 	}
+	
+	inode_group = calloc(32, sizeof(struct efs_inode));
+	for(i = 0; i < 31; i++){
+		ret = write(fd, inode_group, EFS_DEFAULT_BLOCK_SIZE);
+	} 
+
 	printf("root directory inode written succesfully\n");
-	/* End of writing blocks 3-35 - inode Store */
+	/* End of writing blocks 3-34 - inode Store */
 	ret = 0;
 
 exit:

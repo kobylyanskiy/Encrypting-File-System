@@ -601,10 +601,8 @@ int efs_fill_super(struct super_block *sb, void *data, int silent){
 	return 0;
 }
 
-static struct dentry *efs_mount(struct file_system_type *fs_type,
-                                     int flags, const char *dev_name,
-                                     void *data)
-{
+static struct dentry *efs_mount(struct file_system_type *fs_type, int flags,
+				 const char *dev_name, void *data){
         struct dentry *ret;
 
         ret = mount_bdev(fs_type, flags, dev_name, data, efs_fill_super);
@@ -653,5 +651,5 @@ module_init(efs_init);
 module_exit(efs_exit);
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Kirill Kobylyanskiy");
+MODULE_AUTHOR("Kirill Kobylyanskiy k.kobylyanskiy@gmail.com");
 MODULE_DESCRIPTION("Encrypting filesystem");
